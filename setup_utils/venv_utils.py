@@ -257,10 +257,9 @@ def setup_environment(environment_path, with_pip=True, torch_version="1.8.1"):
     # install torch-geometric
     if cuda_version in ('101', '102', '111'):
         # wheels are provided for these versions
-        find_link = f"-f https://pytorch-geometric.com/whl/torch-{torch_version}+cu{cuda_version}.html"
-        for pkg in ("torch-scatter", "torch-sparse", "torch-cluster", "torch-geometric"):
+        for pkg in ("torch_scatter", "torch_sparse", "torch_cluster", "torch_geometric"):
             print(f"Installing {pkg}")
-            pkg_inst_script = ve_setup.pkg_install_script(pkg, additional_parameter=find_link)
+            pkg_inst_script = ve_setup.pkg_install_script("git+https://github.com/PierceLBrooks/py"+pkg+".git@brignet")
             subprocess.check_call(pkg_inst_script)
     else:
         # we gotta build'em wheels

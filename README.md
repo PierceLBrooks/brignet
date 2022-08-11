@@ -96,11 +96,11 @@ pip install [package-name] -f https://pytorch-geometric.com/whl/torch-[version]+
 ```
 
 ```
-pip install torch-scatter -f https://pytorch-geometric.com/whl/torch-1.8.1+cu102.html
-pip install torch-sparse -f https://pytorch-geometric.com/whl/torch-1.8.1+cu102.html
-pip install torch-cluster -f https://pytorch-geometric.com/whl/torch-1.8.1+cu102.html
-pip install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-1.8.1+cu102.html
-pip install torch-geometric
+pip install git+https://github.com/PierceLBrooks/pytorch_scatter.git@brignet -f https://pytorch-geometric.com/whl/torch-1.8.1+cu102.html
+pip install git+https://github.com/PierceLBrooks/pytorch_sparse.git@brignet -f https://pytorch-geometric.com/whl/torch-1.8.1+cu102.html
+pip install git+https://github.com/PierceLBrooks/pytorch_cluster.git@brignet -f https://pytorch-geometric.com/whl/torch-1.8.1+cu102.html
+pip install git+https://github.com/PierceLBrooks/pytorch_spline_conv.git@brignet -f https://pytorch-geometric.com/whl/torch-1.8.1+cu102.html
+pip install git+https://github.com/PierceLBrooks/pytorch_geometric.git@brignet
 ```
 
 Alternatively, pip can try and build the libraries. Even if part of torch-sparse fails without a proper environment,

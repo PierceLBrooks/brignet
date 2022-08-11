@@ -48,12 +48,12 @@ class CudaDetect:
         """Checks for cuda hardware in cycles preferences"""
         prefs = bpy.context.preferences
         cprefs = prefs.addons['cycles'].preferences
+        devices = cprefs.devices
 
-        for device in cprefs.get_devices(bpy.context):
-            for dev_entry in device:
-                if dev_entry.type == 'CUDA':
-                    self.has_cuda_hardware = True
-                    return
+        for dev_entry in devices:
+            if dev_entry.type == 'CUDA':
+                self.has_cuda_hardware = True
+                return
 
     def detect_cuda_ver(self):
         """Try execute the cuda compiler with the --version flag"""
