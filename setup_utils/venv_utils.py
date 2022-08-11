@@ -102,7 +102,11 @@ class VenvAutoSetup:
                                               suffix='.bat' if self._on_win else None,
                                               delete=False)
 
-        pkg_line = f'"{self.py_exe}" -m pip install {package_name}'
+        pkg_line = ""
+        if ("pytorch" in package_name):
+            pkg_line += f'"{self.py_exe}" -m pip install git+https://github.com/PierceLBrooks/{package_name}.git@brignet'
+        else:
+            pkg_line += f'"{self.py_exe}" -m pip install {package_name}'
         if additional_parameter:
             pkg_line += f" {additional_parameter}"
 
@@ -257,9 +261,9 @@ def setup_environment(environment_path, with_pip=True, torch_version="1.8.1"):
     # install torch-geometric
     if cuda_version in ('101', '102', '111'):
         # wheels are provided for these versions
-        for pkg in ("torch_scatter", "torch_sparse", "torch_cluster", "torch_geometric"):
+        for pkg in ("pytorch_scatter", "pytorch_sparse", "pytorch_cluster", "pytorch_geometric"):
             print(f"Installing {pkg}")
-            pkg_inst_script = ve_setup.pkg_install_script("git+https://github.com/PierceLBrooks/py"+pkg+".git@brignet")
+            pkg_inst_script = ve_setup.pkg_install_script(pkg)
             subprocess.check_call(pkg_inst_script)
     else:
         # we gotta build'em wheels
