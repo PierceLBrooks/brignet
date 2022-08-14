@@ -366,3 +366,72 @@ def unregister_properties():
     del bpy.types.WindowManager.brignet_current_progress
     del bpy.types.WindowManager.brignet_predict_weights
     del bpy.types.WindowManager.brignet_mirror_names
+
+def predict():
+    from . import rignetconnect
+
+    context = bpy.context
+    wm = context.window_manager
+
+    bandwidth = (1 - wm.brignet_density) / 10
+    threshold = wm.brignet_threshold/1000
+    current_step = PredictSteps(0)
+    
+    _networks = None
+    _mesh_storage = None
+    _pred_data = None
+    _pred_skeleton = None
+    _pred_rig = None
+    _armature = None
+
+    wm.brignet_targetmesh = context.selected_objects[0]
+    wm.brignet_targetmesh.hide_set(False)  # hidden target mesh might cause crashes
+    while (True):
+        if current_step == PredictSteps.Loading_Networks:
+            _networks = rignetconnect.Networks(load_skinning=wm.brignet_predict_weights)
+        elif current_step == PredictSteps.Creating_Data:
+            _pred_data, _mesh_storage = rignetconnect.init_data(wm.brignet_targetmesh, wm.brignet_samples)
+        elif current_step == PredictSteps.Predicting_Joints:
+            _pred_data = rignetconnect.predict_joint(_pred_data, _networks.joint_net, _mesh_storage,
+                                                          bandwidth, threshold)
+        elif current_step == PredictSteps.Predicting_Hierarchy:
+            _pred_skeleton = rignetconnect.predict_hierarchy(_pred_data, _networks, _mesh_storage)
+        elif current_step == PredictSteps.Predicting_Weights:
+            if wm.brignet_predict_weights:
+                _pred_rig = rignetconnect.predict_weights(_pred_data, _pred_skeleton,
+                                                               _networks.skin_net, _mesh_storage)
+            else:
+                _pred_rig = _pred_skeleton
+                mesh_data = _mesh_storage.mesh_data
+                _pred_rig.normalize(mesh_data.scale_normalize, -mesh_data.translation_normalize)
+        elif current_step == PredictSteps.Creating_Armature:
+            _armature = rignetconnect.create_armature(wm.brignet_targetmesh, _pred_rig)
+        elif current_step == PredictSteps.Post_Generation and _armature:
+            if wm.brignet_mirror_names:
+                renamer = NameFix(_armature)
+                renamer.name_left_right()
+        elif current_step == PredictSteps.Finished:
+            if wm.brignet_highrescollection:
+                wm.brignet_highrescollection.hide_viewport = False
+                objects.copy_weights(wm.brignet_highrescollection.objects, wm.brignet_targetmesh)
+
+                for ob in wm.brignet_highrescollection.all_objects:
+                    ob.hide_set(False)
+                wm.brignet_targetmesh.hide_set(True)
+
+            break
+
+        # Advance current state
+        try:
+            current_step = PredictSteps(current_step.value + 1)
+            wm.brignet_current_progress = current_step.value
+        except ValueError:
+            return False
+    
+    wm.brignet_targetmesh.select_set(True)
+    _armature.select_set(True)
+    for name in context.selected_objects:
+        print(str(name.name))
+    bpy.ops.object.parent_set(type='ARMATURE_AUTO')
+    
+    return True

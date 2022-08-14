@@ -45,7 +45,7 @@ def get_armature_modifier(ob):
     return next((mod for mod in ob.modifiers if mod.type == 'ARMATURE'), None)
 
 
-def copy_weights(ob_list, ob_source, apply_modifier=True):
+def copy_weights(ob_list, ob_source, apply_modifier=False):
     src_mod = get_armature_modifier(ob_source)
     src_mod.show_viewport = False
     src_mod.show_render = False
@@ -58,7 +58,7 @@ def copy_weights(ob_list, ob_source, apply_modifier=True):
         if not transf:
             continue
 
-        transf.object = ob_source
+        #transf.object = ob_source
         transf.use_vert_data = True
         transf.data_types_verts = {'VGROUP_WEIGHTS'}
         transf.vert_mapping = 'POLY_NEAREST'
